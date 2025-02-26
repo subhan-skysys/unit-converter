@@ -65,22 +65,42 @@ def convert_temperature(value, from_unit, to_unit):
 
 # Streamlit UI
 st.title("🔢 Unit Converter")
-st.markdown("Convert Length, Weight, Temperature, Time, and Speed easily, just like Google.")
+st.markdown("Convert Length, Weight, Temperature, Time, and Speed dynamically in real-time.")
 
 # Select Category
-category = st.selectbox("Select conversion category:", list(unit_conversions.keys()))
+category = st.selectbox("Select conversion category:", list(unit_conversions.keys()), index=0)
 
-# Input fields
-value = st.number_input("Enter value:", min_value=0.0, format="%.2f")
+# Create two columns
+col1, col2, col3 = st.columns([4, 1, 4])  # Left for input, Right for result
 
-from_unit = st.selectbox("From:", list(unit_conversions[category].keys()))
-to_unit = st.selectbox("To:", list(unit_conversions[category].keys()))
+with col1:
+    # User input value
+    value = st.number_input("Enter Value:", min_value=0.0, format="%.2f", key="from_value")
 
-# Convert units
-if st.button("Convert"):
+    # Select 'From' unit
+    from_unit = st.selectbox("From:", list(unit_conversions[category].keys()), key="from_unit")
+
+with col2:
+    # Display equal sign
+    st.markdown("<h2 style='text-align: center; margin-top: 50px;'>=</h2>", unsafe_allow_html=True)
+
+with col3:
+    # Convert and display converted value
     if category == "Temperature":
-        result = convert_temperature(value, from_unit, to_unit)
+        result = convert_temperature(value, from_unit, from_unit)  # Default value in case of no change
     else:
-        result = convert_units(value, from_unit, to_unit, category)
+        result = convert_units(value, from_unit, from_unit, category)
 
-    st.success(f"{value} {from_unit} is equal to {result:.2f} {to_unit}")
+    st.number_input("Converted Value:", value=result, key="to_value", disabled=True)
+
+    # Select 'To' unit
+    to_unit = st.selectbox("To:", list(unit_conversions[category].keys()), key="to_unit")
+
+# Recalculate conversion on user input
+if category == "Temperature":
+    result = convert_temperature(value, from_unit, to_unit)
+else:
+    result = convert_units(value, from_unit, to_unit, category)
+
+# Display the final result dynamically
+st.success(f"{value} {from_unit} = {result:.2f} {to_unit}")
